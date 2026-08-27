@@ -411,20 +411,20 @@ export default function InboxPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
       <Navigation />
 
       {/* Main Layout Grid */}
       <div className="flex-1 flex overflow-hidden h-[calc(100vh-4rem)]">
         
         {/* Left Pane: Leads List */}
-        <aside className="w-80 border-r border-slate-700 flex flex-col bg-slate-900">
-          <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+        <aside className="w-80 border-r border-slate-200 flex flex-col bg-white">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               Leads Ingested
               <button 
                 onClick={() => fetchLeads(tenantId)} 
-                className="p-1 hover:bg-slate-800 rounded transition-all text-slate-400 hover:text-slate-200"
+                className="p-1 hover:bg-slate-100 rounded transition-all text-slate-500 hover:text-slate-800"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
@@ -432,20 +432,20 @@ export default function InboxPage() {
 
             <button
               onClick={() => setShowMockModal(true)}
-              className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded flex items-center gap-1 font-medium transition-all"
+              className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded flex items-center gap-1 font-semibold transition-all shadow-sm shadow-indigo-600/10"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               Test Incoming
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-800">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
             {loadingLeads ? (
               <div className="flex justify-center items-center py-12">
-                <div className="w-6 h-6 border-2 border-slate-800 border-t-indigo-500 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
               </div>
             ) : leads.length === 0 ? (
-              <div className="p-6 text-center text-slate-500 text-xs">
+              <div className="p-6 text-center text-slate-400 text-xs font-medium">
                 No leads ingested yet. Use "Test Incoming" to submit a mock message.
               </div>
             ) : (
@@ -455,26 +455,28 @@ export default function InboxPage() {
                   <button
                     key={lead.id}
                     onClick={() => setSelectedLeadId(lead.id)}
-                    className={`w-full text-left p-4 transition-all flex flex-col gap-1.5 ${
-                      isSelected ? 'bg-slate-800' : 'hover:bg-slate-800/40'
+                    className={`w-full text-left p-4 transition-all flex flex-col gap-1.5 border-l-4 ${
+                      isSelected 
+                        ? 'bg-indigo-50/30 border-indigo-600 font-semibold' 
+                        : 'border-transparent hover:bg-slate-50/50'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200 truncate">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 truncate">
                         {getPlatformIcon(lead.sourcePlatform)}
                         {lead.contactName || 'Anonymous Contact'}
                       </div>
-                      <span className="text-[9px] text-slate-500">
+                      <span className="text-[9px] text-slate-400 font-medium">
                         {new Date(lead.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className={`px-1.5 py-0.5 text-[9px] font-medium rounded ${
-                        lead.status === 'new' ? 'bg-indigo-900/30 text-indigo-400 border border-indigo-800/50' :
-                        lead.status === 'contacted' ? 'bg-amber-900/30 text-amber-400 border border-amber-800/50' :
-                        lead.status === 'qualified' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-800/50' :
-                        'bg-slate-800 text-slate-400'
+                      <span className={`px-1.5 py-0.5 text-[9px] font-semibold rounded ${
+                        lead.status === 'new' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                        lead.status === 'contacted' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                        lead.status === 'qualified' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                        'bg-slate-100 text-slate-500'
                       }`}>
                         {lead.status.toUpperCase()}
                       </span>
@@ -488,16 +490,16 @@ export default function InboxPage() {
         </aside>
 
         {/* Center Pane: Conversations History */}
-        <section className="flex-1 flex flex-col bg-slate-950 border-r border-slate-700">
+        <section className="flex-1 flex flex-col bg-slate-50/50 border-r border-slate-200">
           {selectedLeadId ? (
             <>
               {/* Thread Header */}
-              <div className="p-4 border-b border-slate-700 flex items-center justify-between bg-slate-900">
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white shadow-sm">
                 <div>
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-bold text-slate-800">
                     {selectedLead?.contactName || 'Chat Log'}
                   </h3>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-slate-500 font-medium">
                     Channel: {selectedLead?.sourcePlatform.toUpperCase()} | Address: {selectedLead?.sourceLeadId}
                   </p>
                 </div>
@@ -515,11 +517,13 @@ export default function InboxPage() {
                       <div className={`flex ${isInbound ? 'justify-start' : 'justify-end'}`}>
                         <div className={`max-w-md p-3.5 rounded-2xl text-sm leading-relaxed ${
                           isInbound 
-                            ? 'bg-slate-800 text-slate-100 rounded-tl-none' 
+                            ? 'bg-white text-slate-800 border border-slate-100 shadow-sm rounded-tl-none' 
                             : 'bg-indigo-600 text-white rounded-tr-none'
                         }`}>
                           <p>{message.content}</p>
-                          <span className="block text-[9px] text-slate-400 mt-1.5 text-right">
+                          <span className={`block text-[9px] mt-1.5 text-right ${
+                            isInbound ? 'text-slate-400 font-medium' : 'text-indigo-200 font-medium'
+                          }`}>
                             {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
@@ -527,39 +531,39 @@ export default function InboxPage() {
 
                       {/* AI Response Card - Display directly underneath the triggering inbound message */}
                       {isInbound && message.aiProcessed && (
-                        <div className="max-w-md mx-auto sm:ml-6 bg-slate-900/80 border border-indigo-500/30 rounded-xl p-4 space-y-3">
-                          <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
-                            <span className="text-indigo-400 font-semibold flex items-center gap-1.5">
-                              <Bot className="w-4 h-4" />
+                        <div className="max-w-md mx-auto sm:ml-6 bg-white border border-indigo-100/80 shadow-sm shadow-indigo-600/5 rounded-xl p-4 space-y-3">
+                          <div className="flex items-center justify-between text-xs border-b border-slate-100 pb-2">
+                            <span className="text-indigo-600 font-bold flex items-center gap-1.5">
+                              <Bot className="w-4 h-4 text-indigo-600" />
                               PropSathi AI Triage Layer
                             </span>
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-[10px] text-slate-400 font-medium">
                               Intent: {message.aiClassification?.intent.toUpperCase()}
                             </span>
                           </div>
 
                           <div className="text-xs space-y-1">
-                            <span className="text-slate-400 font-medium">Extracted Criteria:</span>
+                            <span className="text-slate-500 font-semibold">Extracted Criteria:</span>
                             <div className="flex gap-2 flex-wrap text-[10px]">
                               {message.aiClassification?.extracted_parameters?.location && (
-                                <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">
+                                <span className="bg-slate-50 text-slate-600 border border-slate-100 font-medium px-2 py-0.5 rounded">
                                   Loc: {message.aiClassification.extracted_parameters.location}
                                 </span>
                               )}
                               {message.aiClassification?.extracted_parameters?.budget && (
-                                <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">
+                                <span className="bg-slate-50 text-slate-600 border border-slate-100 font-medium px-2 py-0.5 rounded">
                                   Budget: ${message.aiClassification.extracted_parameters.budget}
                                 </span>
                               )}
                               {message.aiClassification?.extracted_parameters?.bedrooms && (
-                                <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300">
+                                <span className="bg-slate-50 text-slate-600 border border-slate-100 font-medium px-2 py-0.5 rounded">
                                   Beds: {message.aiClassification.extracted_parameters.bedrooms} BHK
                                 </span>
                               )}
                               {!message.aiClassification?.extracted_parameters?.location && 
                                !message.aiClassification?.extracted_parameters?.budget && 
                                !message.aiClassification?.extracted_parameters?.bedrooms && (
-                                <span className="text-slate-500 italic">None extracted</span>
+                                <span className="text-slate-400 italic">None extracted</span>
                               )}
                             </div>
                           </div>
@@ -567,10 +571,10 @@ export default function InboxPage() {
                           {/* Draft Output */}
                           {message.aiDraftReply && (
                             <div className="space-y-2">
-                              <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs leading-relaxed text-slate-300">
+                              <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg text-xs leading-relaxed text-slate-700">
                                 {editingDraftId === message.id ? (
                                   <textarea
-                                    className="w-full bg-transparent border-0 focus:ring-0 p-0 text-slate-200 outline-none resize-y min-h-[60px]"
+                                    className="w-full bg-transparent border-0 focus:ring-0 p-0 text-slate-800 outline-none resize-y min-h-[60px]"
                                     value={editedDraftText}
                                     onChange={(e) => setEditedDraftText(e.target.value)}
                                   />
@@ -586,13 +590,13 @@ export default function InboxPage() {
                                     <>
                                       <button
                                         onClick={() => setEditingDraftId(null)}
-                                        className="px-2.5 py-1 text-slate-400 hover:text-slate-200 text-xs font-semibold"
+                                        className="px-2.5 py-1 text-slate-500 hover:text-slate-700 text-xs font-semibold"
                                       >
                                         Cancel
                                       </button>
                                       <button
                                         onClick={() => handleApproveDraft(message.id, editedDraftText)}
-                                        className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold flex items-center gap-1"
+                                        className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold flex items-center gap-1"
                                       >
                                         <Check className="w-3.5 h-3.5" />
                                         Save & Send
@@ -605,13 +609,13 @@ export default function InboxPage() {
                                           setEditingDraftId(message.id);
                                           setEditedDraftText(message.aiDraftReply || '');
                                         }}
-                                        className="px-2.5 py-1 border border-slate-700 hover:border-slate-600 rounded text-slate-300 text-xs font-semibold"
+                                        className="px-2.5 py-1 border border-slate-200 hover:bg-slate-50 rounded text-slate-600 text-xs font-semibold transition-all"
                                       >
                                         Edit Draft
                                       </button>
                                       <button
                                         onClick={() => handleApproveDraft(message.id)}
-                                        className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-semibold flex items-center gap-1 shadow-md shadow-indigo-600/10"
+                                        className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold flex items-center gap-1 shadow-sm shadow-indigo-600/10 transition-all"
                                       >
                                         <Check className="w-3.5 h-3.5" />
                                         Approve & Send
@@ -622,13 +626,13 @@ export default function InboxPage() {
                               )}
 
                               {message.aiDraftStatus === 'approved' && (
-                                <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 justify-end">
+                                <div className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 justify-end">
                                   <Check className="w-3.5 h-3.5" /> Approved & Sent by Agent
                                 </div>
                               )}
                               
                               {message.aiDraftStatus === 'auto_sent' && (
-                                <div className="text-[10px] text-indigo-400 font-semibold flex items-center gap-1 justify-end">
+                                <div className="text-[10px] text-indigo-600 font-semibold flex items-center gap-1 justify-end">
                                   <Check className="w-3.5 h-3.5" /> Automatically Dispatched (Confidence High)
                                 </div>
                               )}
@@ -642,57 +646,57 @@ export default function InboxPage() {
               </div>
 
               {/* Reply Input Box */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-700 bg-slate-900 flex items-center gap-2">
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-200 bg-white flex items-center gap-2 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]">
                 <input
                   type="text"
                   placeholder="Type an outbound message back to lead..."
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-100 placeholder-slate-500"
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-600 focus:bg-white text-slate-800 placeholder-slate-400 transition-all"
                 />
                 <button
                   type="submit"
                   disabled={!replyText.trim() || sendingReply}
-                  className="p-3 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50 text-white rounded-xl transition-all shadow-md flex items-center justify-center shrink-0"
+                  className="p-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded-xl transition-all shadow-md shadow-indigo-600/10 flex items-center justify-center shrink-0"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </form>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-2">
-              <MessageSquare className="w-12 h-12 stroke-[1.5] text-slate-700" />
-              <p className="text-sm">Select a conversation thread to review messages.</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 bg-white">
+              <MessageSquare className="w-12 h-12 stroke-[1.5] text-slate-300" />
+              <p className="text-sm font-medium">Select a conversation thread to review messages.</p>
             </div>
           )}
         </section>
 
         {/* Right Pane: Lead Context & Recommendations */}
-        <aside className="w-80 border-l border-slate-700 flex flex-col bg-slate-900 overflow-y-auto divide-y divide-slate-800">
+        <aside className="w-80 border-l border-slate-200 flex flex-col bg-white overflow-y-auto divide-y divide-slate-100">
           {selectedLead ? (
             <>
               {/* Lead Profile */}
               <div className="p-5 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-300 font-bold">
+                  <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200 text-slate-600 font-extrabold">
                     {selectedLead.contactName ? selectedLead.contactName.charAt(0) : 'U'}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-white">{selectedLead.contactName || 'Unknown Lead'}</h4>
-                    <span className="text-[10px] text-slate-500">Workspace Member since {new Date(selectedLead.createdAt).toLocaleDateString()}</span>
+                    <h4 className="font-bold text-slate-800">{selectedLead.contactName || 'Unknown Lead'}</h4>
+                    <span className="text-[10px] text-slate-400 font-medium">Workspace Member since {new Date(selectedLead.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-xs">
                   {selectedLead.contactPhone && (
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Phone className="w-4 h-4 text-slate-500" />
+                    <div className="flex items-center gap-2 text-slate-600 font-medium">
+                      <Phone className="w-4 h-4 text-slate-400" />
                       {selectedLead.contactPhone}
                     </div>
                   )}
                   {selectedLead.contactEmail && (
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Mail className="w-4 h-4 text-slate-500" />
+                    <div className="flex items-center gap-2 text-slate-600 font-medium">
+                      <Mail className="w-4 h-4 text-slate-400" />
                       {selectedLead.contactEmail}
                     </div>
                   )}
@@ -706,11 +710,11 @@ export default function InboxPage() {
                 <div className="space-y-3">
                   {/* Pipeline Status */}
                   <div className="space-y-1">
-                    <label className="text-[10px] text-slate-500 font-semibold uppercase">Lead Status</label>
+                    <label className="text-[10px] text-slate-500 font-bold uppercase">Lead Status</label>
                     <select
                       value={selectedLead.status}
                       onChange={(e) => updateLeadStatus(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white text-slate-700 font-semibold transition-all"
                     >
                       <option value="new">New</option>
                       <option value="contacted">Contacted</option>
@@ -722,11 +726,11 @@ export default function InboxPage() {
 
                   {/* Manual Score Overrides */}
                   <div className="space-y-1">
-                    <label className="text-[10px] text-slate-500 font-semibold uppercase">Triage Score</label>
+                    <label className="text-[10px] text-slate-500 font-bold uppercase">Triage Score</label>
                     <select
                       value={selectedLead.score || ''}
                       onChange={(e) => updateLeadScore(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white text-slate-700 font-semibold transition-all"
                     >
                       <option value="">Unrated</option>
                       <option value="hot">Hot</option>
@@ -737,11 +741,11 @@ export default function InboxPage() {
                 </div>
 
                 {selectedLead.scoreReasoning && (
-                  <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-lg text-[11px] leading-relaxed text-slate-400 flex gap-2">
-                    <AlertCircle className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <div className="p-3 bg-indigo-50/50 border border-indigo-100/80 rounded-lg text-[11px] leading-relaxed text-slate-600 flex gap-2">
+                    <AlertCircle className="w-4 h-4 text-indigo-500 shrink-0" />
                     <div>
-                      <p className="font-semibold text-slate-300">AI Scoring Context:</p>
-                      <p>{selectedLead.scoreReasoning}</p>
+                      <p className="font-bold text-indigo-700">AI Scoring Context:</p>
+                      <p className="text-slate-600 font-medium">{selectedLead.scoreReasoning}</p>
                     </div>
                   </div>
                 )}
@@ -751,25 +755,25 @@ export default function InboxPage() {
               <div className="p-5 space-y-3">
                 <h5 className="text-xs font-bold uppercase tracking-wider text-slate-400">Matched Inventory</h5>
                 {matchedListings.length === 0 ? (
-                  <div className="text-[11px] text-slate-500 italic p-4 text-center border border-dashed border-slate-800 rounded-lg">
+                  <div className="text-[11px] text-slate-400 italic p-4 text-center border border-dashed border-slate-200 rounded-lg">
                     No relevant property matching criteria detected yet.
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {matchedListings.map((listing) => (
-                      <div key={listing.id} className="p-3 bg-slate-950 border border-slate-800 rounded-xl hover:border-slate-700 transition-all space-y-1.5">
+                      <div key={listing.id} className="p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-slate-200 hover:bg-slate-100/30 transition-all space-y-1.5 shadow-sm">
                         <div className="flex justify-between items-start gap-2">
-                          <span className="font-semibold text-xs text-slate-200 line-clamp-1">
+                          <span className="font-bold text-xs text-slate-800 line-clamp-1">
                             {listing.title}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-                          <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
                           {listing.location}
                         </div>
-                        <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800">
-                          <span className="font-bold text-indigo-400">${Number(listing.price)}/mo</span>
-                          <span className="text-[10px] text-slate-400">{listing.bedrooms} BHK | {listing.propertyType.toUpperCase()}</span>
+                        <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                          <span className="font-extrabold text-indigo-600">${Number(listing.price)}/mo</span>
+                          <span className="text-[10px] text-slate-500 font-semibold">{listing.bedrooms} BHK | {listing.propertyType.toUpperCase()}</span>
                         </div>
                       </div>
                     ))}
@@ -778,7 +782,7 @@ export default function InboxPage() {
               </div>
             </>
           ) : (
-            <div className="p-6 text-center text-slate-500 text-xs">
+            <div className="p-6 text-center text-slate-400 text-xs font-medium">
               Select a lead to inspect contexts.
             </div>
           )}
@@ -787,16 +791,16 @@ export default function InboxPage() {
 
       {/* Mock Webhook Modal */}
       {showMockModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
-            <div className="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-900">
-              <h3 className="font-bold text-white flex items-center gap-2">
-                <Bot className="w-5 h-5 text-indigo-400" />
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white border border-slate-100 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <Bot className="w-5 h-5 text-indigo-600" />
                 Mock Inbound Webhook Event
               </h3>
               <button 
                 onClick={() => setShowMockModal(false)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-600"
               >
                 ✕
               </button>
@@ -805,24 +809,24 @@ export default function InboxPage() {
             <div className="p-5 space-y-4">
               {/* Platform Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-400 font-semibold uppercase">Platform</label>
+                <label className="text-xs text-slate-400 font-bold uppercase">Platform</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setMockPlatform('telegram')}
-                    className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-all ${
+                    className={`py-2.5 px-3 text-xs font-semibold rounded-lg border text-center transition-all ${
                       mockPlatform === 'telegram'
-                        ? 'border-indigo-500 bg-indigo-500/10 text-white'
-                        : 'border-slate-700 bg-slate-900/50 text-slate-400'
+                        ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700'
+                        : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-350'
                     }`}
                   >
                     Telegram Bot
                   </button>
                   <button
                     onClick={() => setMockPlatform('whatsapp')}
-                    className={`py-2 px-3 text-xs font-semibold rounded-lg border text-center transition-all ${
+                    className={`py-2.5 px-3 text-xs font-semibold rounded-lg border text-center transition-all ${
                       mockPlatform === 'whatsapp'
-                        ? 'border-indigo-500 bg-indigo-500/10 text-white'
-                        : 'border-slate-700 bg-slate-900/50 text-slate-400'
+                        ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700'
+                        : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-350'
                     }`}
                   >
                     WhatsApp Business
@@ -832,52 +836,52 @@ export default function InboxPage() {
 
               {/* Sender Name */}
               <div className="space-y-1">
-                <label className="text-xs text-slate-400 font-semibold uppercase">Sender Name</label>
+                <label className="text-xs text-slate-400 font-bold uppercase">Sender Name</label>
                 <input
                   type="text"
                   value={mockSenderName}
                   onChange={(e) => setMockSenderName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
                 />
               </div>
 
               {/* Sender Phone (Only for WA) */}
               {mockPlatform === 'whatsapp' && (
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-400 font-semibold uppercase">Sender WhatsApp ID (Phone)</label>
+                  <label className="text-xs text-slate-400 font-bold uppercase">Sender WhatsApp ID (Phone)</label>
                   <input
                     type="text"
                     value={mockSenderPhone}
                     onChange={(e) => setMockSenderPhone(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
                   />
                 </div>
               )}
 
               {/* Message Content */}
               <div className="space-y-1">
-                <label className="text-xs text-slate-400 font-semibold uppercase">Inbound Message</label>
+                <label className="text-xs text-slate-400 font-bold uppercase">Inbound Message</label>
                 <textarea
                   rows={3}
                   value={mockMessageContent}
                   onChange={(e) => setMockMessageContent(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all resize-none"
                   placeholder="Ask for listings, budget, locations..."
                 />
               </div>
             </div>
 
-            <div className="p-4 border-t border-slate-700 bg-slate-900 flex justify-end gap-2">
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
               <button
                 onClick={() => setShowMockModal(false)}
-                className="px-4 py-2 border border-slate-700 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200"
+                className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100"
               >
                 Cancel
               </button>
               <button
                 onClick={triggerMockLead}
                 disabled={triggeringMock || !mockMessageContent}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-indigo-600/10"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/15"
               >
                 {triggeringMock ? (
                   <>

@@ -49,34 +49,34 @@ export default function WorkspaceSelector() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-xl">
+    <main className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/30">
         <div className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <div className="mx-auto w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
             <Building2 className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             PropSathi CRM
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-500">
             AI-Powered Multi-Tenant Real Estate Inbox
           </p>
         </div>
-
+ 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="w-10 h-10 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
             <p className="text-xs text-slate-400">Loading your workspaces...</p>
           </div>
         ) : error ? (
-          <div className="p-4 bg-red-900/30 border border-red-500/50 rounded-xl flex items-start gap-3">
-            <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+          <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="text-sm font-semibold text-red-200">Error Loading Workspaces</h4>
-              <p className="text-xs text-red-400 leading-relaxed">{error}</p>
+              <h4 className="text-sm font-semibold text-red-800 font-bold">Error Loading Workspaces</h4>
+              <p className="text-xs text-red-600 leading-relaxed">{error}</p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 underline font-semibold"
+                className="mt-2 text-xs text-indigo-600 hover:text-indigo-700 underline font-semibold"
               >
                 Retry
               </button>
@@ -85,7 +85,7 @@ export default function WorkspaceSelector() {
         ) : (
           <div className="space-y-6">
             <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Select Workspace / Account
               </label>
               
@@ -98,15 +98,15 @@ export default function WorkspaceSelector() {
                       onClick={() => setSelectedTenant(tenant.id)}
                       className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between ${
                         isSelected
-                          ? 'border-indigo-500 bg-indigo-500/10 text-white font-medium'
-                          : 'border-slate-700 hover:border-slate-600 bg-slate-800/50 text-slate-300 hover:text-slate-200'
+                          ? 'border-indigo-600 bg-indigo-50/40 text-indigo-700 font-semibold'
+                          : 'border-slate-100 hover:border-slate-200 bg-slate-50/50 text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Building2 className={`w-5 h-5 ${isSelected ? 'text-indigo-400' : 'text-slate-400'}`} />
+                        <Building2 className={`w-5 h-5 ${isSelected ? 'text-indigo-600' : 'text-slate-400'}`} />
                         <div>
-                          <p className="text-sm font-semibold">{tenant.name}</p>
-                          <p className="text-[10px] text-slate-500">ID: {tenant.id.slice(0, 8)}...</p>
+                          <p className="text-sm font-bold">{tenant.name}</p>
+                          <p className="text-[10px] text-slate-400 font-medium">ID: {tenant.id.slice(0, 8)}...</p>
                         </div>
                       </div>
                       {isSelected && (
@@ -119,11 +119,11 @@ export default function WorkspaceSelector() {
                 })}
               </div>
             </div>
-
+ 
             <button
               onClick={handleLaunch}
               disabled={!selectedTenant}
-              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 group"
+              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded-xl font-semibold shadow-lg shadow-indigo-600/10 transition-all flex items-center justify-center gap-2 group"
             >
               Enter CRM Console
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
@@ -131,8 +131,8 @@ export default function WorkspaceSelector() {
           </div>
         )}
         
-        <div className="pt-4 border-t border-slate-700/50 text-center">
-          <p className="text-[11px] text-slate-500">
+        <div className="pt-4 border-t border-slate-100 text-center">
+          <p className="text-[11px] text-slate-400 font-medium">
             Secure client account routing with strict data boundaries
           </p>
         </div>

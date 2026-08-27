@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { prisma } from '@/lib/db';
 import { decryptJSON } from '@/lib/encryption';
 import { getConnector } from '@/lib/connectors/manager';
@@ -136,10 +136,13 @@ export async function POST(
       },
     });
 
-    // 4. Trigger AI background processing asynchronously
-    // In serverless, we can call it without awaiting or wrap it in Next.js runtime helpers
-    processWebhookEvent(eventLog.id).catch((err) => {
-      console.error(`AI Background processing error on webhook log ${eventLog.id}:`, err);
+    // 4. Trigger AI background processing asynchronously without blocking response
+    after(async () => {
+      try {
+        await processWebhookEvent(eventLog.id);
+      } catch (err) {
+        console.error(`AI Background processing error on webhook log ${eventLog.id}:`, err);
+      }
     });
 
     // Return immediate 200 OK to the platform
