@@ -87,6 +87,7 @@ export async function processWebhookEvent(webhookEventId: string): Promise<void>
     if (!lead) {
       lead = await tenantPrisma.lead.create({
         data: {
+          tenantId: webhookResult.tenantId,
           sourcePlatform: logEntry.platform,
           sourceLeadId: webhookResult.leadExternalId,
           contactName: webhookResult.leadData.name,

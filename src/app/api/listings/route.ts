@@ -55,6 +55,7 @@ export async function POST(request: Request) {
     // 1. Insert metadata to database (embedding column is nullable unsupported type)
     const listing = await tenantPrisma.listing.create({
       data: {
+        tenantId,
         title,
         description: description || '',
         price: Number(price),

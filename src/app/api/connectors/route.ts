@@ -70,6 +70,7 @@ export async function POST(request: Request) {
     // Create entry
     const connector = await tenantPrisma.connector.create({
       data: {
+        tenantId,
         platform: platform.toLowerCase(),
         name,
         externalId: externalId || null,
