@@ -18,7 +18,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     const response = await ai.models.embedContent({
       model: 'text-embedding-004',
       contents: cleanText,
-    });
+    }) as any;
 
     // Access the embedding values returned by the SDK
     const embedding = response.embedding || (response.embeddings && response.embeddings[0]);

@@ -19,7 +19,7 @@ export function getTenantPrisma(tenantId: string) {
   return prisma.$extends({
     query: {
       $allModels: {
-        async $allOperations({ model, operation, args, query }) {
+        async $allOperations({ model, operation, args, query }: { model: string; operation: string; args: any; query: (args: any) => Promise<any> }) {
           const tenantModels = ['User', 'Connector', 'Lead', 'Listing', 'WebhookEventLog'];
 
           if (!tenantModels.includes(model)) {

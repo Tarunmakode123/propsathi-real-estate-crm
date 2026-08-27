@@ -18,6 +18,7 @@ interface Lead {
   scoreReasoning: string | null;
   sourcePlatform: string;
   sourceLeadId: string | null;
+  createdAt: string;
   updatedAt: string;
 }
 
