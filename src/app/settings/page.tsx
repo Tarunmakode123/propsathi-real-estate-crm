@@ -37,6 +37,19 @@ export default function SettingsPage() {
   const [tgSecretToken, setTgSecretToken] = useState('');
   const [tgUsername, setTgUsername] = useState('');
 
+  // Facebook Messenger-specific state
+  const [fbPageId, setFbPageId] = useState('');
+  const [fbToken, setFbToken] = useState('');
+  const [fbSecret, setFbSecret] = useState('');
+
+  // Instagram-specific state
+  const [igAccountId, setIgAccountId] = useState('');
+  const [igToken, setIgToken] = useState('');
+  const [igSecret, setIgSecret] = useState('');
+
+  // Generic Webhook-specific state
+  const [genericSecret, setGenericSecret] = useState('');
+
   const [saving, setSaving] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -94,6 +107,33 @@ export default function SettingsPage() {
           autoRespond: true,
           tone: 'friendly, direct, and enthusiastic',
         };
+      } else if (platform === 'facebook') {
+        credentials = {
+          accessToken: fbToken,
+          appSecret: fbSecret,
+        };
+        config = {
+          pageId: fbPageId,
+          autoRespond: true,
+          tone: 'professional and courteous',
+        };
+      } else if (platform === 'instagram') {
+        credentials = {
+          accessToken: igToken,
+          appSecret: igSecret,
+        };
+        config = {
+          instagramId: igAccountId,
+          autoRespond: true,
+          tone: 'casual, helpful, and fast',
+        };
+      } else if (platform === 'generic') {
+        credentials = {
+          secretToken: genericSecret || 'propsathi_generic_secret',
+        };
+        config = {
+          autoRespond: false,
+        };
       }
 
       const res = await fetch('/api/connectors', {
@@ -103,7 +143,12 @@ export default function SettingsPage() {
           tenantId,
           platform,
           name,
-          externalId: platform === 'whatsapp' ? waPhoneId : tgUsername,
+          externalId:
+            platform === 'whatsapp' ? waPhoneId :
+            platform === 'telegram' ? tgUsername :
+            platform === 'facebook' ? fbPageId :
+            platform === 'instagram' ? igAccountId :
+            `generic_${Date.now()}`,
           config,
           credentials,
         }),
@@ -119,6 +164,13 @@ export default function SettingsPage() {
         setTgBotToken('');
         setTgSecretToken('');
         setTgUsername('');
+        setFbPageId('');
+        setFbToken('');
+        setFbSecret('');
+        setIgAccountId('');
+        setIgToken('');
+        setIgSecret('');
+        setGenericSecret('');
         setShowAddForm(false);
         fetchConnectors(tenantId);
       } else {
@@ -185,7 +237,7 @@ export default function SettingsPage() {
               {/* Platform selection */}
               <div className="space-y-1.5">
                 <label className="text-xs text-slate-400 font-semibold uppercase">Channel Type</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => { setPlatform('telegram'); setName('Telegram bot'); }}
@@ -217,6 +269,54 @@ export default function SettingsPage() {
                       <p className="text-[10px] text-slate-500">Official Cloud API</p>
                     </div>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setPlatform('facebook'); setName('Facebook Page Messenger'); }}
+                    className={`py-3 px-4 rounded-xl border text-left transition-all flex items-center gap-2.5 ${
+                      platform === 'facebook'
+                        ? 'border-indigo-500 bg-indigo-500/10 text-white font-medium'
+                        : 'border-slate-700 bg-slate-900/50 text-slate-400'
+                    }`}
+                  >
+                    <MessageSquare className="w-5 h-5 text-blue-400" />
+                    <div>
+                      <p className="text-xs font-bold text-white">Facebook Messenger</p>
+                      <p className="text-[10px] text-slate-500">Page Chat Channel</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setPlatform('instagram'); setName('Instagram Direct'); }}
+                    className={`py-3 px-4 rounded-xl border text-left transition-all flex items-center gap-2.5 ${
+                      platform === 'instagram'
+                        ? 'border-indigo-500 bg-indigo-500/10 text-white font-medium'
+                        : 'border-slate-700 bg-slate-900/50 text-slate-400'
+                    }`}
+                  >
+                    <MessageCircle className="w-5 h-5 text-pink-400" />
+                    <div>
+                      <p className="text-xs font-bold text-white">Instagram DM</p>
+                      <p className="text-[10px] text-slate-500">Direct Messaging</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setPlatform('generic'); setName('Custom JSON Webhook'); }}
+                    className={`py-3 px-4 rounded-xl border text-left transition-all flex items-center gap-2.5 sm:col-span-2 ${
+                      platform === 'generic'
+                        ? 'border-indigo-500 bg-indigo-500/10 text-white font-medium'
+                        : 'border-slate-700 bg-slate-900/50 text-slate-400'
+                    }`}
+                  >
+                    <Link2 className="w-5 h-5 text-amber-400" />
+                    <div>
+                      <p className="text-xs font-bold text-white">Custom HTTP Webhook</p>
+                      <p className="text-[10px] text-slate-500">Ingest raw JSON payloads from any lead portal</p>
+                    </div>
+                  </button>
                 </div>
               </div>
 
@@ -234,7 +334,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Platform Specific Fields */}
-              {platform === 'whatsapp' ? (
+              {platform === 'whatsapp' && (
                 <div className="space-y-3 pt-2 border-t border-slate-700/50">
                   <div className="space-y-1">
                     <label className="text-xs text-slate-400 font-semibold uppercase">WhatsApp Phone Number ID</label>
@@ -284,7 +384,9 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {platform === 'telegram' && (
                 <div className="space-y-3 pt-2 border-t border-slate-700/50">
                   <div className="space-y-1">
                     <label className="text-xs text-slate-400 font-semibold uppercase">Telegram Bot Username</label>
@@ -319,6 +421,105 @@ export default function SettingsPage() {
                       placeholder="propsathi_tg_secret"
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
                     />
+                  </div>
+                </div>
+              )}
+
+              {platform === 'facebook' && (
+                <div className="space-y-3 pt-2 border-t border-slate-700/50">
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400 font-semibold uppercase">Facebook Page ID</label>
+                    <input
+                      type="text"
+                      required
+                      value={fbPageId}
+                      onChange={(e) => setFbPageId(e.target.value)}
+                      placeholder="e.g. 104829102839281"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400 font-semibold uppercase">Page Access Token</label>
+                    <input
+                      type="password"
+                      required
+                      value={fbToken}
+                      onChange={(e) => setFbToken(e.target.value)}
+                      placeholder="Permanent Page Access Token (EAA...)"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400 font-semibold uppercase">Meta App Secret</label>
+                    <input
+                      type="password"
+                      required
+                      value={fbSecret}
+                      onChange={(e) => setFbSecret(e.target.value)}
+                      placeholder="Find in app basic settings panel"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {platform === 'instagram' && (
+                <div className="space-y-3 pt-2 border-t border-slate-700/50">
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400 font-semibold uppercase">Instagram Professional ID</label>
+                    <input
+                      type="text"
+                      required
+                      value={igAccountId}
+                      onChange={(e) => setIgAccountId(e.target.value)}
+                      placeholder="e.g. 1784140539283921"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400 font-semibold uppercase">Page Access Token (Linked page)</label>
+                    <input
+                      type="password"
+                      required
+                      value={igToken}
+                      onChange={(e) => setIgToken(e.target.value)}
+                      placeholder="Permanent Page Access Token (EAA...)"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400 font-semibold uppercase">Meta App Secret</label>
+                    <input
+                      type="password"
+                      required
+                      value={igSecret}
+                      onChange={(e) => setIgSecret(e.target.value)}
+                      placeholder="App Secret from basic settings"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {platform === 'generic' && (
+                <div className="space-y-3 pt-2 border-t border-slate-700/50">
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400 font-semibold uppercase">Secret Webhook Token (Optional)</label>
+                    <input
+                      type="text"
+                      value={genericSecret}
+                      onChange={(e) => setGenericSecret(e.target.value)}
+                      placeholder="propsathi_generic_secret"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 text-[10px] text-slate-400 space-y-1">
+                    <span className="font-bold text-slate-300">💡 Custom Integration Info:</span>
+                    <p>Once linked, we will generate a dedicated Inbound Webhook URL. You can send any POST payload with lead data to it, and our AI processor will parse it automatically.</p>
                   </div>
                 </div>
               )}
