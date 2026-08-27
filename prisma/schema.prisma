@@ -1,0 +1,128 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id             String            @id @default(uuid())
+  name           String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  users          User[]
+  connectors     Connector[]
+  leads          Lead[]
+  listings       Listing[]
+  webhookEvents  WebhookEventLog[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name      String
+  email     String   @unique
+  role      String   // "admin" | "agent"
+  createdAt DateTime @default(now())
+  leads     Lead[]
+
+  @@index([tenantId])
+}
+
+model Connector {
+  id                   String            @id @default(uuid())
+  tenantId             String
+  tenant               Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  platform             String            // "whatsapp" | "messenger" | "instagram" | "telegram" | "google" | "generic"
+  name                 String
+  externalId           String?           // e.g., phone_number_id, page_id, bot_username (unique identifier for routing)
+  config               Json              // Public configuration parameters
+  encryptedCredentials String            // AES-256-GCM encrypted API keys/tokens
+  status               String            @default("active") // "active" | "inactive" | "error"
+  errorMessage         String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  webhookEvents        WebhookEventLog[]
+
+  @@unique([platform, externalId])
+  @@index([tenantId])
+}
+
+model Lead {
+  id             String    @id @default(uuid())
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sourcePlatform String    // e.g., "whatsapp", "telegram", "generic", "facebook_ads"
+  sourceLeadId   String?   // External lead ID if applicable
+  contactName    String?
+  contactPhone   String?
+  contactEmail   String?
+  status         String    @default("new") // "new" | "contacted" | "qualified" | "won" | "lost"
+  score          String?   // "hot" | "warm" | "cold"
+  scoreReasoning String?
+  assignedTo     String?
+  assignedUser   User?     @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
+  rawPayload     Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  messages       Message[]
+
+  @@index([tenantId])
+  @@index([assignedTo])
+}
+
+model Message {
+  id                 String   @id @default(uuid())
+  leadId             String
+  lead               Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  direction          String   // "inbound" | "outbound"
+  platform           String   // "whatsapp" | "telegram" etc.
+  externalMessageId  String?
+  content            String
+  aiProcessed        Boolean  @default(false)
+  aiClassification   Json?    // { intent, confidence, sentiment, entities: { budget, location, bedrooms } }
+  aiDraftReply       String?
+  aiDraftStatus      String   @default("none") // "none" | "pending_approval" | "approved" | "rejected" | "auto_sent"
+  createdAt          DateTime @default(now())
+
+  @@index([leadId])
+}
+
+model Listing {
+  id           String                      @id @default(uuid())
+  tenantId     String
+  tenant       Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title        String
+  description  String
+  price        Decimal                     @db.Decimal(12, 2)
+  location     String
+  bedrooms     Int
+  bathrooms    Int
+  propertyType String                      // "apartment" | "house" | "villa" | "commercial" etc.
+  embedding    Unsupported("vector(768)")?
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+
+  @@index([tenantId])
+}
+
+model WebhookEventLog {
+  id           String     @id @default(uuid())
+  tenantId     String?
+  tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  connectorId  String?
+  connector    Connector? @relation(fields: [connectorId], references: [id], onDelete: SetNull)
+  platform     String
+  headers      Json
+  payload      Json
+  status       String     @default("pending") // "pending" | "processing" | "completed" | "failed" | "dead_letter"
+  retryCount   Int        @default(0)
+  errorLog     String?
+  createdAt    DateTime   @default(now())
+
+  @@index([tenantId])
+  @@index([connectorId])
+}

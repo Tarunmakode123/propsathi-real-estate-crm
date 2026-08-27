@@ -1,69 +1,142 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Building2, ArrowRight, ShieldAlert, Check } from 'lucide-react';
+
+interface Tenant {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export default function WorkspaceSelector() {
+  const router = useRouter();
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [selectedTenant, setSelectedTenant] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchTenants() {
+      try {
+        const res = await fetch('/api/tenants');
+        if (!res.ok) throw new Error('Failed to load workspaces');
+        const data = await res.json();
+        setTenants(data);
+        
+        // Auto-select first tenant if exists
+        if (data.length > 0) {
+          setSelectedTenant(data[0].id);
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to fetch workspaces');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTenants();
+  }, []);
+
+  const handleLaunch = () => {
+    if (!selectedTenant) return;
+    const tenant = tenants.find((t) => t.id === selectedTenant);
+    if (!tenant) return;
+
+    localStorage.setItem('tenantId', tenant.id);
+    localStorage.setItem('tenantName', tenant.name);
+    router.push('/inbox');
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-xl">
+        <div className="text-center space-y-2">
+          <div className="mx-auto w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <Building2 className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+            PropSathi CRM
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-sm text-slate-400">
+            AI-Powered Multi-Tenant Real Estate Inbox
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <div className="w-10 h-10 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin"></div>
+            <p className="text-xs text-slate-400">Loading your workspaces...</p>
+          </div>
+        ) : error ? (
+          <div className="p-4 bg-red-900/30 border border-red-500/50 rounded-xl flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold text-red-200">Error Loading Workspaces</h4>
+              <p className="text-xs text-red-400 leading-relaxed">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 underline font-semibold"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Select Workspace / Account
+              </label>
+              
+              <div className="space-y-2">
+                {tenants.map((tenant) => {
+                  const isSelected = selectedTenant === tenant.id;
+                  return (
+                    <button
+                      key={tenant.id}
+                      onClick={() => setSelectedTenant(tenant.id)}
+                      className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between ${
+                        isSelected
+                          ? 'border-indigo-500 bg-indigo-500/10 text-white font-medium'
+                          : 'border-slate-700 hover:border-slate-600 bg-slate-800/50 text-slate-300 hover:text-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Building2 className={`w-5 h-5 ${isSelected ? 'text-indigo-400' : 'text-slate-400'}`} />
+                        <div>
+                          <p className="text-sm font-semibold">{tenant.name}</p>
+                          <p className="text-[10px] text-slate-500">ID: {tenant.id.slice(0, 8)}...</p>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-white">
+                          <Check className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              onClick={handleLaunch}
+              disabled={!selectedTenant}
+              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-semibold shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 group"
+            >
+              Enter CRM Console
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </div>
+        )}
+        
+        <div className="pt-4 border-t border-slate-700/50 text-center">
+          <p className="text-[11px] text-slate-500">
+            Secure client account routing with strict data boundaries
+          </p>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
