@@ -137,13 +137,24 @@ export async function POST(
     });
 
     // 4. Trigger AI background processing asynchronously without blocking response
-    after(async () => {
-      try {
-        await processWebhookEvent(eventLog.id);
-      } catch (err) {
-        console.error(`AI Background processing error on webhook log ${eventLog.id}:`, err);
-      }
-    });
+    try {
+      after(async () => {
+        try {
+          await processWebhookEvent(eventLog.id);
+        } catch (err) {
+          console.error(`AI Background processing error on webhook log ${eventLog.id}:`, err);
+        }
+      });
+    } catch (afterErr) {
+      // In testing contexts where request scope is missing
+      setImmediate(async () => {
+        try {
+          await processWebhookEvent(eventLog.id);
+        } catch (err) {
+          console.error(`AI Background processing error (test fallback) on webhook log ${eventLog.id}:`, err);
+        }
+      });
+    }
 
     // Return immediate 200 OK to the platform
     return NextResponse.json({ success: true, logId: eventLog.id }, { status: 200 });

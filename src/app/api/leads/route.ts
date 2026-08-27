@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma, getTenantPrisma } from '@/lib/db';
+import { authorizeTenant } from '@/lib/auth-helper';
 
 /**
  * GET - Retrieve leads list or detailed lead record.
@@ -12,6 +13,13 @@ export async function GET(request: Request) {
 
     if (!tenantId) {
       return NextResponse.json({ error: 'tenantId query parameter is required' }, { status: 400 });
+    }
+
+    // Server-side tenant authorization check
+    try {
+      await authorizeTenant(tenantId);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: err.status || 403 });
     }
 
     const tenantPrisma = getTenantPrisma(tenantId);
@@ -56,6 +64,13 @@ export async function PATCH(request: Request) {
 
     if (!tenantId || !leadId) {
       return NextResponse.json({ error: 'tenantId and leadId are required in body' }, { status: 400 });
+    }
+
+    // Server-side tenant authorization check
+    try {
+      await authorizeTenant(tenantId);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: err.status || 403 });
     }
 
     const tenantPrisma = getTenantPrisma(tenantId);

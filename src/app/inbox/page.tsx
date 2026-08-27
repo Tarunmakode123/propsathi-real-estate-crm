@@ -7,6 +7,7 @@ import {
   MessageCircle, HelpCircle, Phone, Mail, Award, MapPin, 
   DollarSign, Home, AlertCircle, PlusCircle, RefreshCw
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Lead {
   id: string;
@@ -54,6 +55,7 @@ interface Listing {
 }
 
 export default function InboxPage() {
+  const router = useRouter();
   const [tenantId, setTenantId] = useState<string>('');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -80,11 +82,23 @@ export default function InboxPage() {
   const [triggeringMock, setTriggeringMock] = useState(false);
 
   useEffect(() => {
-    const id = localStorage.getItem('tenantId');
-    if (id) {
-      setTenantId(id);
-      fetchLeads(id);
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) {
+          router.push('/login');
+          return;
+        }
+        const data = await res.json();
+        setTenantId(data.user.tenantId);
+        localStorage.setItem('tenantId', data.user.tenantId);
+        localStorage.setItem('tenantName', data.user.tenantName);
+        fetchLeads(data.user.tenantId);
+      } catch (err) {
+        router.push('/login');
+      }
     }
+    checkAuth();
   }, []);
 
   useEffect(() => {

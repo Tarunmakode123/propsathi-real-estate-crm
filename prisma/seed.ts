@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import { hashPassword } from '../src/lib/auth';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
@@ -59,6 +60,7 @@ async function main() {
       name: 'Agent Tarun',
       email: 'tarun@propsathielite.com',
       role: 'agent',
+      passwordHash: hashPassword('tarun123'),
     },
   });
 
@@ -68,10 +70,11 @@ async function main() {
       name: 'Agent Sarah',
       email: 'sarah@apexhomes.com',
       role: 'agent',
+      passwordHash: hashPassword('sarah123'),
     },
   });
 
-  console.log('Created workspace users.');
+  console.log('Created workspace users with hashed passwords.');
 
   // 4. Create Connectors for Tenant 1 (WhatsApp and Telegram)
   const waCreds = {

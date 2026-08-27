@@ -20,10 +20,15 @@ export default function Navigation() {
     }
   }, [router]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error('Logout request failed:', err);
+    }
     localStorage.removeItem('tenantId');
     localStorage.removeItem('tenantName');
-    router.push('/');
+    router.push('/login');
   };
 
   const navItems = [

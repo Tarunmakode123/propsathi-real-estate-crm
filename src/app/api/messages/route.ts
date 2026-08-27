@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma, getTenantPrisma } from '@/lib/db';
 import { decryptJSON } from '@/lib/encryption';
 import { getConnector } from '@/lib/connectors/manager';
+import { authorizeTenant } from '@/lib/auth-helper';
 
 /**
  * GET - Retrieve message list for a lead.
@@ -14,6 +15,13 @@ export async function GET(request: Request) {
 
     if (!tenantId || !leadId) {
       return NextResponse.json({ error: 'tenantId and leadId are required' }, { status: 400 });
+    }
+
+    // Server-side tenant authorization check
+    try {
+      await authorizeTenant(tenantId);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: err.status || 403 });
     }
 
     const tenantPrisma = getTenantPrisma(tenantId);
@@ -39,6 +47,13 @@ export async function POST(request: Request) {
 
     if (!tenantId || !action) {
       return NextResponse.json({ error: 'tenantId and action are required' }, { status: 400 });
+    }
+
+    // Server-side tenant authorization check
+    try {
+      await authorizeTenant(tenantId);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: err.status || 403 });
     }
 
     const tenantPrisma = getTenantPrisma(tenantId);

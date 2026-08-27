@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Navigation from '@/components/navigation';
 import { Plus, Home, MapPin, DollarSign, Bed, Bath, ArrowUpRight, Search, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Listing {
   id: string;
@@ -17,6 +18,7 @@ interface Listing {
 }
 
 export default function ListingsPage() {
+  const router = useRouter();
   const [tenantId, setTenantId] = useState<string>('');
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,11 +37,23 @@ export default function ListingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const id = localStorage.getItem('tenantId');
-    if (id) {
-      setTenantId(id);
-      fetchListings(id);
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) {
+          router.push('/login');
+          return;
+        }
+        const data = await res.json();
+        setTenantId(data.user.tenantId);
+        localStorage.setItem('tenantId', data.user.tenantId);
+        localStorage.setItem('tenantName', data.user.tenantName);
+        fetchListings(data.user.tenantId);
+      } catch (err) {
+        router.push('/login');
+      }
     }
+    checkAuth();
   }, []);
 
   const fetchListings = async (id: string) => {

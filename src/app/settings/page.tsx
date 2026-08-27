@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Navigation from '@/components/navigation';
 import { Settings, Shield, Plus, MessageCircle, MessageSquare, Link2, Copy, Check, Info } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Connector {
   id: string;
@@ -16,6 +17,7 @@ interface Connector {
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [tenantId, setTenantId] = useState<string>('');
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,11 +56,23 @@ export default function SettingsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = localStorage.getItem('tenantId');
-    if (id) {
-      setTenantId(id);
-      fetchConnectors(id);
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) {
+          router.push('/login');
+          return;
+        }
+        const data = await res.json();
+        setTenantId(data.user.tenantId);
+        localStorage.setItem('tenantId', data.user.tenantId);
+        localStorage.setItem('tenantName', data.user.tenantName);
+        fetchConnectors(data.user.tenantId);
+      } catch (err) {
+        router.push('/login');
+      }
     }
+    checkAuth();
   }, []);
 
   const fetchConnectors = async (id: string) => {

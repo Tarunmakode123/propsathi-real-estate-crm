@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma, getTenantPrisma } from '@/lib/db';
 import { generateEmbedding } from '@/lib/ai';
+import { authorizeTenant } from '@/lib/auth-helper';
 
 /**
  * GET - Retrieve listings for a tenant.
@@ -12,6 +13,13 @@ export async function GET(request: Request) {
 
     if (!tenantId) {
       return NextResponse.json({ error: 'tenantId is required' }, { status: 400 });
+    }
+
+    // Server-side tenant authorization check
+    try {
+      await authorizeTenant(tenantId);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: err.status || 403 });
     }
 
     const tenantPrisma = getTenantPrisma(tenantId);
@@ -48,6 +56,13 @@ export async function POST(request: Request) {
         { error: 'tenantId, title, price, and location are required' },
         { status: 400 }
       );
+    }
+
+    // Server-side tenant authorization check
+    try {
+      await authorizeTenant(tenantId);
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: err.status || 403 });
     }
 
     const tenantPrisma = getTenantPrisma(tenantId);

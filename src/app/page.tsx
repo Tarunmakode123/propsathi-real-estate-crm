@@ -18,24 +18,19 @@ export default function WorkspaceSelector() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchTenants() {
+    async function checkAuth() {
       try {
-        const res = await fetch('/api/tenants');
-        if (!res.ok) throw new Error('Failed to load workspaces');
-        const data = await res.json();
-        setTenants(data);
-        
-        // Auto-select first tenant if exists
-        if (data.length > 0) {
-          setSelectedTenant(data[0].id);
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          router.push('/inbox');
+        } else {
+          router.push('/login');
         }
-      } catch (err: any) {
-        setError(err?.message || 'Failed to fetch workspaces');
-      } finally {
-        setLoading(false);
+      } catch {
+        router.push('/login');
       }
     }
-    fetchTenants();
+    checkAuth();
   }, []);
 
   const handleLaunch = () => {
