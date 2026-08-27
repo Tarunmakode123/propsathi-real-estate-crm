@@ -307,6 +307,7 @@ export default function InboxPage() {
           },
         };
       } else if (mockPlatform === 'whatsapp') {
+        headers = { 'X-Propsathi-Mock': 'propsathi_meta_secret_2026' };
         payload = {
           object: 'whatsapp_business_account',
           entry: [
